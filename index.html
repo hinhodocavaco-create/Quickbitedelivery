@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuickBite — Sistema de Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & base ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:       #e8321a;
+      --red-dark:  #c42a14;
+      --red-light: #fdf1ee;
+      --ink:       #1a1612;
+      --muted:     #7a6f6a;
+      --border:    #e8e0dc;
+      --bg:        #f7f3f0;
+      --white:     #ffffff;
+      --green:     #1a8a4a;
+      --green-bg:  #edfaf2;
+      --amber:     #c97a0a;
+      --amber-bg:  #fef7e6;
+      --blue:      #1a5cb5;
+      --blue-bg:   #eef3fc;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────── */
+    header {
+      background: var(--ink);
+      color: var(--white);
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-dot {
+      width: 10px; height: 10px;
+      background: var(--red);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .badge-server {
+      font-size: 0.75rem;
+      background: #2a2420;
+      border: 1px solid #3a3430;
+      color: #88c999;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    /* ── Nav Tabs ─────────────────────────────── */
+    nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 0;
+      padding: 0 32px;
+      overflow-x: auto;
+    }
+
+    .nav-tab {
+      padding: 16px 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      white-space: nowrap;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .nav-tab:hover { color: var(--ink); background: var(--red-light); }
+    .nav-tab.active { color: var(--red); border-bottom-color: var(--red); }
+
+    /* ── Layout ───────────────────────────────── */
+    main { max-width: 860px; margin: 0 auto; padding: 32px 24px 80px; }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Card ─────────────────────────────────── */
+    .card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── Form elements ────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 580px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      color: var(--ink);
+      background: var(--white);
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(232, 50, 26, 0.12);
+    }
+
+    /* ── Buttons ──────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 12px 22px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--red);
+      color: var(--white);
+      width: 100%;
+      justify-content: center;
+      margin-top: 6px;
+    }
+    .btn-primary:hover { background: var(--red-dark); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    .btn-ghost {
+      background: var(--bg);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      font-size: 0.85rem;
+      padding: 9px 16px;
+    }
+    .btn-ghost:hover { background: var(--red-light); border-color: var(--red); color: var(--red); }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+
+    /* ── Response boxes ───────────────────────── */
+    .response {
+      margin-top: 16px;
+      border-radius: 10px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .response-header {
+      padding: 10px 16px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .response.ok  .response-header { background: var(--green-bg); color: var(--green); }
+    .response.err .response-header { background: #fdf1ee; color: var(--red); }
+    .response.info .response-header { background: var(--blue-bg); color: var(--blue); }
+
+    .response pre {
+      background: #1a1612;
+      color: #e8e0dc;
+      padding: 16px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      overflow-x: auto;
+      max-height: 340px;
+    }
+
+    /* ── Product checkboxes ───────────────────── */
+    .product-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+
+    .product-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .product-item:hover { border-color: var(--red); background: var(--red-light); }
+    .product-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--red); cursor: pointer; flex-shrink: 0; }
+
+    .product-item-info { flex: 1; }
+    .product-item-name { font-weight: 600; font-size: 0.95rem; }
+    .product-item-desc { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .product-item-price { font-weight: 700; color: var(--red); font-size: 1rem; }
+
+    /* ── Pill badges ──────────────────────────── */
+    .pill {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .pill-lanche    { background: #fff3cd; color: #856404; }
+    .pill-bebida    { background: var(--blue-bg); color: var(--blue); }
+    .pill-sobremesa { background: #fce8f8; color: #8a1472; }
+    .pill-prato     { background: var(--green-bg); color: var(--green); }
+    .pill-entrada   { background: var(--amber-bg); color: var(--amber); }
+
+    /* ── Section labels ───────────────────────── */
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin: 0 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 24px;
+      font-size: 0.9rem;
+    }
+
+    /* ── Loading spinner ──────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    QuickBite
+  </div>
+  <div class="badge-server">● servidor :3000</div>
+</header>
+
+<nav>
+  <div class="nav-tab active" data-tab="empresa">🏪 Cadastrar Empresa</div>
+  <div class="nav-tab" data-tab="produto">🍕 Cadastrar Produto</div>
+  <div class="nav-tab" data-tab="relatorio">📊 Relatórios</div>
+  <div class="nav-tab" data-tab="pedido">🛒 Fazer Pedido</div>
+</nav>
+
+<main>
+
+  <!-- ════════════════════════════════ -->
+  <!--  FASE 2 — Cadastro de Empresa   -->
+  <!-- ════════════════════════════════ -->
+  <div id="panel-empresa" class="panel active">
+
+    <div class="card">
+      <p class="card-title">🏪 Nova Empresa</p>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Nome da Empresa</label>
+          <input id="emp-nome" type="text" placeholder="Ex: Burger Palace" />
+        </div>
+        <div class="field">
+          <label>CNPJ</label>
+          <input id="emp-cnpj" type="text" placeholder="00.000.000/0001-00" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Endereço</label>
+        <input id="emp-endereco" type="text" placeholder="Rua, número, bairro — Cidade/UF" />
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Tipo de Culinária</label>
+          <select id="emp-culinaria">
+            <option value="">Selecione...</option>
+            <option>Hambúrguer</option>
+            <option>Pizza</option>
+            <option>Japonesa</option>
+            <option>Brasileira</option>
+            <option>Italiana</option>
+            <option>Mexicana</option>
+            <option>Árabe</option>
+            <option>Vegetariana</option>
+            <option>Frutos do Mar</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Taxa de Entrega (R$)</label>
+          <input id="emp-taxa" type="number" placeholder="5.99" step="0.01" min="0" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="btn-emp" onclick="cadastrarEmpresa()">
+        ✅ Cadastrar Empresa
+      </button>
+
+      <div id="emp-result" class="response"></div>
+    </div>
+
+    <!-- Lista de empresas -->
+    <div class="card">
+      <p class="card-title">📋 Empresas Cadastradas</p>
+      <button class="btn btn-ghost" onclick="listarEmpresas()">🔄 Atualizar lista</button>
+      <div id="emp-lista" class="response info" style="display:none; margin-top:16px;">
+        <div class="response-header">📦 GET /empresas</div>
+        <pre id="emp-lista-pre"></pre>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ════════════════════════════════ -->
+  <!--  FASE 3 — Cadastro de Produto   -->
+  <!-- ════════════════════════════════ -->
+  <div id="panel-produto" class="panel">
+
+    <div class="card">
+      <p class="card-title">🍕 Novo Produto</p>
+
+      <div class="field">
+        <label>Empresa</label>
+        <select id="prod-empresa">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+
+      <div class="grid-2">
+        <div class="field">
+          <label>Nome do Produto</label>
+          <input id="prod-nome" type="text" placeholder="Ex: X-Tudo Especial" />
+        </div>
+        <div class="field">
+          <label>Categoria</label>
+          <select id="prod-categoria">
+            <option value="">Selecione...</option>
+            <option value="lanche">Lanche</option>
+            <option value="bebida">Bebida</option>
+            <option value="sobremesa">Sobremesa</option>
+            <option value="prato">Prato</option>
+            <option value="entrada">Entrada</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Descrição</label>
+        <input id="prod-descricao" type="text" placeholder="Descreva o produto brevemente..." />
+      </div>
+
+      <div class="field">
+        <label>Preço (R$)</label>
+        <input id="prod-preco" type="number" placeholder="19.90" step="0.01" min="0" />
+      </div>
+
+      <button class="btn btn-primary" onclick="cadastrarProduto()">
+        ✅ Cadastrar Produto
+      </button>
+
+      <div id="prod-result" class="response"></div>
+    </div>
+
+  </div>
+
+
+  <!-- ════════════════════════════════ -->
+  <!--  FASE 4 — Relatórios            -->
+  <!-- ════════════════════════════════ -->
+  <div id="panel-relatorio" class="panel">
+
+    <div class="card">
+      <p class="card-title">📊 Relatórios</p>
+
+      <div class="grid-2" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Empresa</label>
+          <select id="rel-empresa">
+            <option value="">Selecione...</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Categoria (para filtro)</label>
+          <select id="rel-categoria">
+            <option value="lanche">Lanche</option>
+            <option value="bebida">Bebida</option>
+            <option value="sobremesa">Sobremesa</option>
+            <option value="prato">Prato</option>
+            <option value="entrada">Entrada</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-ghost" onclick="relCardapio()">🗺️ Cardápio <code>.map()</code></button>
+        <button class="btn btn-ghost" onclick="relCategoria()">🔎 Por Categoria <code>.filter()</code></button>
+        <button class="btn btn-ghost" onclick="relTotal()">💰 Total <code>.reduce()</code></button>
+        <button class="btn btn-ghost" onclick="relResumo()">📋 Resumo Geral <code>for...of</code></button>
+      </div>
+
+      <div id="rel-result" class="response"></div>
+    </div>
+
+  </div>
+
+
+  <!-- ════════════════════════════════ -->
+  <!--  FASE 5 — Simulação de Pedido   -->
+  <!-- ════════════════════════════════ -->
+  <div id="panel-pedido" class="panel">
+
+    <div class="card">
+      <p class="card-title">🛒 Fazer Pedido</p>
+
+      <div class="field">
+        <label>Empresa</label>
+        <select id="ped-empresa" onchange="carregarProdutosPedido()">
+          <option value="">Selecione a empresa...</option>
+        </select>
+      </div>
+
+      <div id="ped-produtos"></div>
+
+      <button class="btn btn-primary" id="btn-pedido" onclick="fazerPedido()" style="display:none;">
+        🚀 Confirmar Pedido
+      </button>
+
+      <div id="ped-result" class="response"></div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+/* ══════════════════════════════════════════
+   Utilitários
+══════════════════════════════════════════ */
+
+// Troca de abas
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const name = tab.dataset.tab;
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + name).classList.add('active');
+
+    if (name === 'produto')   carregarSelect('prod-empresa');
+    if (name === 'relatorio') carregarSelect('rel-empresa');
+    if (name === 'pedido')    carregarSelect('ped-empresa');
+  });
+});
+
+// Preenche um <select> com a lista de empresas da API
+async function carregarSelect(id) {
+  try {
+    const res = await fetch('/empresas');
+    const empresas = await res.json();
+    const sel = document.getElementById(id);
+    const valorAtual = sel.value;
+    sel.innerHTML = '<option value="">Selecione a empresa...</option>';
+    empresas.forEach(e => {
+      const opt = document.createElement('option');
+      opt.value = e.id;
+      opt.textContent = `${e.nome} — ${e.culinaria}`;
+      sel.appendChild(opt);
+    });
+    if (valorAtual) sel.value = valorAtual;
+  } catch (err) {
+    console.error('Erro ao carregar empresas:', err);
+  }
+}
+
+// Exibe a caixa de resposta JSON
+function mostrarResposta(elementId, data, status) {
+  const box = document.getElementById(elementId);
+  const isOk = status >= 200 && status < 300;
+  box.className = 'response ' + (isOk ? 'ok' : 'err');
+  box.innerHTML = `
+    <div class="response-header">
+      ${isOk ? '✅' : '❌'} HTTP ${status}
+    </div>
+    <pre>${JSON.stringify(data, null, 2)}</pre>
+  `;
+  box.style.display = 'block';
+}
+
+/* ══════════════════════════════════════════
+   FASE 2 — Empresa
+══════════════════════════════════════════ */
+
+async function cadastrarEmpresa() {
+  const nome       = document.getElementById('emp-nome').value.trim();
+  const cnpj       = document.getElementById('emp-cnpj').value.trim();
+  const endereco   = document.getElementById('emp-endereco').value.trim();
+  const culinaria  = document.getElementById('emp-culinaria').value;
+  const taxaEntrega = document.getElementById('emp-taxa').value;
+
+  if (!nome || !cnpj || !endereco || !culinaria || !taxaEntrega) {
+    mostrarResposta('emp-result', { erro: 'Preencha todos os campos.' }, 400);
+    return;
+  }
+
+  const res  = await fetch('/empresa', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome, cnpj, endereco, culinaria, taxaEntrega })
+  });
+  const data = await res.json();
+  mostrarResposta('emp-result', data, res.status);
+
+  if (res.ok) {
+    // Limpa o formulário
+    ['emp-nome','emp-cnpj','emp-endereco','emp-taxa'].forEach(id =>
+      document.getElementById(id).value = ''
+    );
+    document.getElementById('emp-culinaria').value = '';
+  }
+}
+
+async function listarEmpresas() {
+  const res  = await fetch('/empresas');
+  const data = await res.json();
+  document.getElementById('emp-lista-pre').textContent = JSON.stringify(data, null, 2);
+  document.getElementById('emp-lista').style.display = 'block';
+}
+
+/* ══════════════════════════════════════════
+   FASE 3 — Produto
+══════════════════════════════════════════ */
+
+async function cadastrarProduto() {
+  const empresaId = document.getElementById('prod-empresa').value;
+  const nome      = document.getElementById('prod-nome').value.trim();
+  const descricao = document.getElementById('prod-descricao').value.trim();
+  const preco     = document.getElementById('prod-preco').value;
+  const categoria = document.getElementById('prod-categoria').value;
+
+  if (!empresaId || !nome || !descricao || !preco || !categoria) {
+    mostrarResposta('prod-result', { erro: 'Preencha todos os campos.' }, 400);
+    return;
+  }
+
+  const res  = await fetch(`/produto/${empresaId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nome, descricao, preco, categoria })
+  });
+  const data = await res.json();
+  mostrarResposta('prod-result', data, res.status);
+
+  if (res.ok) {
+    ['prod-nome','prod-descricao','prod-preco'].forEach(id =>
+      document.getElementById(id).value = ''
+    );
+    document.getElementById('prod-categoria').value = '';
+  }
+}
+
+/* ══════════════════════════════════════════
+   FASE 4 — Relatórios
+══════════════════════════════════════════ */
+
+function getEmpresaId() {
+  const id = document.getElementById('rel-empresa').value;
+  if (!id) { alert('Selecione uma empresa!'); return null; }
+  return id;
+}
+
+async function relCardapio() {
+  const id = getEmpresaId(); if (!id) return;
+  const res  = await fetch(`/relatorio/cardapio/${id}`);
+  const data = await res.json();
+  mostrarResposta('rel-result', data, res.status);
+}
+
+async function relCategoria() {
+  const id  = getEmpresaId(); if (!id) return;
+  const cat = document.getElementById('rel-categoria').value;
+  const res  = await fetch(`/relatorio/categoria/${id}/${cat}`);
+  const data = await res.json();
+  mostrarResposta('rel-result', data, res.status);
+}
+
+async function relTotal() {
+  const id = getEmpresaId(); if (!id) return;
+  const res  = await fetch(`/relatorio/total/${id}`);
+  const data = await res.json();
+  mostrarResposta('rel-result', data, res.status);
+}
+
+async function relResumo() {
+  const res  = await fetch('/relatorio/resumo');
+  const data = await res.json();
+  mostrarResposta('rel-result', data, res.status);
+}
+
+/* ══════════════════════════════════════════
+   FASE 5 — Pedido
+══════════════════════════════════════════ */
+
+async function carregarProdutosPedido() {
+  const empresaId = document.getElementById('ped-empresa').value;
+  const container = document.getElementById('ped-produtos');
+  const btnPedido = document.getElementById('btn-pedido');
+
+  container.innerHTML = '';
+  btnPedido.style.display = 'none';
+  document.getElementById('ped-result').style.display = 'none';
+
+  if (!empresaId) return;
+
+  const res     = await fetch('/empresas');
+  const lista   = await res.json();
+  const empresa = lista.find(e => e.id.toString() === empresaId);
+
+  const disponiveis = empresa ? empresa.produtos.filter(p => p.disponivel) : [];
+
+  if (!disponiveis.length) {
+    container.innerHTML = '<p class="empty-state">Nenhum produto disponível nesta empresa.</p>';
+    return;
+  }
+
+  const categoriaPill = cat => `pill-${cat}` in document.styleSheets[0].cssRules
+    ? cat : cat;
+
+  container.innerHTML = `
+    <p class="section-label">Selecione os produtos</p>
+    <div class="product-list">
+      ${disponiveis.map(p => `
+        <label class="product-item">
+          <input type="checkbox" name="produto" value="${p.id}" />
+          <div class="product-item-info">
+            <div class="product-item-name">
+              ${p.nome}
+              <span class="pill pill-${p.categoria}">${p.categoria}</span>
+            </div>
+            <div class="product-item-desc">${p.descricao}</div>
+          </div>
+          <div class="product-item-price">R$ ${p.preco.toFixed(2)}</div>
+        </label>
+      `).join('')}
+    </div>
+  `;
+  btnPedido.style.display = 'flex';
+}
+
+async function fazerPedido() {
+  const empresaId  = document.getElementById('ped-empresa').value;
+  const checkboxes = document.querySelectorAll('input[name="produto"]:checked');
+  const produtoIds = Array.from(checkboxes).map(cb => cb.value);
+
+  if (!produtoIds.length) {
+    alert('Selecione pelo menos um produto!');
+    return;
+  }
+
+  const res  = await fetch('/pedido', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ empresaId, produtoIds })
+  });
+  const data = await res.json();
+  mostrarResposta('ped-result', data, res.status);
+}
+</script>
+</body>
+</html>
