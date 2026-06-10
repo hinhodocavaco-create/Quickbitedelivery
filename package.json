@@ -1,0 +1,12 @@
+{
+  "name": "quickbite",
+  "version": "1.0.0",
+  "description": "Sistema de Delivery — Projeto Curso Técnico Node.js",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
